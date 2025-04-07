@@ -1,37 +1,63 @@
 import java.io.IOException;
 import java.util.*;
+import java.io.*;
 
-public class ClientExecutor implements AutoCloseable {
-
+class ClientThread extends Thread {
+	
 	public static int portnum = 4999;
 	public static boolean running = true;
 	
+	// initiated run method for Thread
+    public void run()
+    {
+        System.out.println("Created Client Thread");
+        
+        try (PrinterClient ftw = new PrinterClient()){
+        	ftw.Run("localhost",portnum);
+        } catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+    }
+    
+}//ClientThread Class
+
+public class ClientExecutor implements AutoCloseable{
+
+	
 	public static void main(String[] args) {
 		Scanner Scantato = new Scanner(System.in);
-		//Exception needed to allow run.
-		//IO catch for server and a General catch for close().
 		
-		try (PrinterClient ftw = new PrinterClient()){
-			while (running == true) {
-				ftw.Run("localhost",portnum);
+		//Thread Class implementation of java threads
+	    ClientThread clientthread = new ClientThread();
+	    clientthread.start();
+			
+	    try {
+			clientthread.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    
+			while (ClientThread.running) {
 				
 				System.out.println("\t\t-What would you like to do?-");
 				System.out.println();
-				System.out.println("\t{1: Close all Clients\t\t\t\t2: Create new client}");
+				System.out.println("\t{1: Close the Client\t\t\t\t2: Keep Client Running}");
 				
 				int choice = Scantato.nextInt();
 				switch (choice) {
 				
-					//Close all clients
+					//Close the client
 					case 1:
 						Scantato.close();
-						running = false;
+						ClientThread.running = false;
+						clientthread.interrupt();
 						break;
 						
-					//Create new client
+					//Keep Client Running
 					case 2:
-						Scantato.close();
-						running = false;
 						break;
 						
 					//repeat
@@ -39,19 +65,15 @@ public class ClientExecutor implements AutoCloseable {
 						break;
 				}//Switch	
 				}//OnceMore
-			}//ftw
 		
- catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 			
 	}//main
 	
+
 
 	@Override
 	public void close() throws Exception {
 		System.out.println("Client: Closing Resources");
 	}
 	
-}
+}//ClientExecutor Class
