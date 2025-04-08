@@ -12,21 +12,18 @@ public class PrinterClient implements AutoCloseable {
 		Object var = null;
 		
 		try (Socket s = new Socket(portname,portnumber);){
-			
-			
-				try (InputStream inputStream = s.getInputStream();){
-					try (ObjectInputStream ois = new ObjectInputStream(inputStream);) {
-						var = ois.readObject();
-						System.out.println(var);					
+			try (InputStream inputStream = s.getInputStream();){
+				try (ObjectInputStream ois = new ObjectInputStream(inputStream);) {
+					var = ois.readObject();
+					System.out.println(var);
 				}//OIS
-				
-				//in the case of an error all catches will include a close.
-				catch (Exception e) {
-					System.out.println("Client Error: Failed to assign ois or var to a value.");
-					s.close();
-					}
+
+			//in the case of an error all catches will include a close.
+			catch (Exception e) {
+				System.out.println("Client Error: Failed to assign ois or var to a value.");
+				s.close();
+				}
 			}//IS
-			
 		}//Socket
 	}//run()
 

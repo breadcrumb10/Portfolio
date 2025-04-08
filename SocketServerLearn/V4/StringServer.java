@@ -20,20 +20,20 @@ public class StringServer implements AutoCloseable{
 			try (Socket s = server.accept();){
 				System.out.println("Server: Client connected");
 				
-					//Sends the Variable to the client.
-					try (OutputStream outputStream = s.getOutputStream();){
-						try (ObjectOutputStream stream = new ObjectOutputStream(outputStream);){
-							while (ServerThread.running) {
+				//Sends the Variable to the client.
+				try (OutputStream outputStream = s.getOutputStream();){
+					try (ObjectOutputStream stream = new ObjectOutputStream(outputStream);){
+						while (ServerThread.running) {
 								stream.writeObject(send_me);
 								stream.flush();		
-							}//while running	
-						}//OOS
-					}//OS
-						catch(Exception e) {
-							System.out.println("Server Error: Could not send variable.");
-							s.close();
-							server.close();
-							}
+						}//while running
+					}//OOS
+				}//OS
+				catch(Exception e) {
+					System.out.println("Server Error: Could not send variable.");
+					s.close();
+					server.close();
+				}
 				
 			}//TryCatch - s
 		}//TryCatch - server 

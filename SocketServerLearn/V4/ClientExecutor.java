@@ -25,51 +25,47 @@ class ClientThread extends Thread {
 
 public class ClientExecutor implements AutoCloseable{
 
-	
 	public static void main(String[] args) {
 		Scanner Scantato = new Scanner(System.in);
 		
 		//Thread Class implementation of java threads
 	    ClientThread clientthread = new ClientThread();
 	    clientthread.start();
-			
-	    try {
+	    
+		while (ClientThread.running) {
+
+			System.out.println("\t\t-What would you like to do?-");
+			System.out.println();
+			System.out.println("\t{1: Close the Client\t\t\t\t2: Keep Client Running}");
+
+			int choice = Scantato.nextInt();
+			switch (choice) {
+
+				//Close the client
+				case 1:
+					Scantato.close();
+					ClientThread.running = false;
+					clientthread.interrupt();
+					break;
+
+				//Keep Client Running
+				case 2:
+					break;
+
+				//repeat
+				default:
+					break;
+			}//Switch
+		}//Running
+
+		try {
 			clientthread.join();
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    
-			while (ClientThread.running) {
-				
-				System.out.println("\t\t-What would you like to do?-");
-				System.out.println();
-				System.out.println("\t{1: Close the Client\t\t\t\t2: Keep Client Running}");
-				
-				int choice = Scantato.nextInt();
-				switch (choice) {
-				
-					//Close the client
-					case 1:
-						Scantato.close();
-						ClientThread.running = false;
-						clientthread.interrupt();
-						break;
-						
-					//Keep Client Running
-					case 2:
-						break;
-						
-					//repeat
-					default:
-						break;
-				}//Switch	
-				}//OnceMore
-		
-			
 	}//main
-	
-
 
 	@Override
 	public void close() throws Exception {
