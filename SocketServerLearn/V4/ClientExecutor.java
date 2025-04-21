@@ -1,36 +1,19 @@
 import java.io.IOException;
 import java.util.*;
-import java.io.*;
 
-class ClientThread extends Thread {
-    public static int portnum = 4999;
-    public static boolean running = true;
+class ClientExecutor extends Thread {
 
-    // initiated run method for Thread
-    public void run() {
-        System.out.println("Created Client Thread");
 
-        try (PrinterClient ftw = new PrinterClient()) {
-            ftw.Run("localhost", portnum);
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-    }
-
-}//ClientThread Class
-
-public class ClientExecutor implements AutoCloseable {
-
+    //Main thread
     public static void main(String[] args) {
         Scanner Scantato = new Scanner(System.in);
 
-        //Thread Class implementation of java threads
-        ClientThread clientthread = new ClientThread();
-        clientthread.start();
+        //Runnable Thread Class implementation of java threads
+        PrinterClient ftw = new PrinterClient("localhost", 4999);
+        Thread client_thread = new Thread(ftw);
+        client_thread.start();
 
-        while (ClientThread.running) {
+        while (ftw.isRunning()) {
 
             System.out.println("\t\t-What would you like to do?-");
             System.out.println();
@@ -42,8 +25,8 @@ public class ClientExecutor implements AutoCloseable {
                 //Close the client
                 case 1:
                     Scantato.close();
-                    ClientThread.running = false;
-                    clientthread.interrupt();
+                    ftw.stop();
+                    client_thread.interrupt();
                     break;
 
                 //Keep Client Running
@@ -53,20 +36,16 @@ public class ClientExecutor implements AutoCloseable {
                 //repeat
                 default:
                     break;
-            }//Switch
-        }//Running
+            }
+        }
 
         try {
-            clientthread.join();
+            client_thread.join();
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-    }//main
-
-    @Override
-    public void close() throws Exception {
-        System.out.println("Client: Closing Resources");
     }
 
-}//ClientExecutor Class
+}
+

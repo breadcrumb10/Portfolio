@@ -1,52 +1,66 @@
 import java.io.IOException;
 import java.net.*;
 import java.io.*;
-import java.util.*;
 
-public class StringServer implements AutoCloseable {
+public class StringServer implements Runnable{
 
+    private final String send_me;
+    private final int port;
+    private boolean is_running;
 
-    //Variables
-    private final String send_me = "*bang*";
+    StringServer(int port, String send_me) {
+        this.port=port;
+        this.send_me=send_me;
+        this.is_running = true;
+    }
+
+    public boolean isRunning (){
+        return is_running;
+    }
+
+    public void stop(){
+        is_running=false;
+    }
 
     //This does everything
-    void MakeandServe(int port) throws IOException {
+    @Override
+    public void run() {
+
+        is_running = true;
 
         //Create Server and Connect Client
-        try (ServerSocket server = new ServerSocket(port);) {
+        try (ServerSocket server = new ServerSocket(port)) {
             System.out.println("\t\t\t<Server established>");
             System.out.println();
             System.out.println("\t\t-Attempting to Connect Client-");
-            try (Socket s = server.accept();) {
-                System.out.println("Server: Client connected");
 
-                //Sends the Variable to the client.
-                try (OutputStream outputStream = s.getOutputStream();) {
-                    try (ObjectOutputStream stream = new ObjectOutputStream(outputStream);) {
-                        while (ServerThread.running) {
+            while (is_running){
+                try (Socket s = server.accept()) {
+                    System.out.println("Server: Client connected");
+
+                    //Sends the Variable to the client.
+                    try (OutputStream outputStream = s.getOutputStream()) {
+                        try (ObjectOutputStream stream = new ObjectOutputStream(outputStream)) {
                             stream.writeObject(send_me);
                             stream.flush();
-                        }//while running
-                    }//OOS
-                }//OS
-                catch (Exception e) {
-                    System.out.println("Server Error: Could not send variable.");
-                    s.close();
-                    server.close();
-                }
+                        }
+                    }
+                    catch (Exception e) {
+                        System.out.println("Server Error: Could not send variable.");
+                        s.close();
+                        server.close();
+                    }
+            }
 
-            }//TryCatch - s
-        }//TryCatch - server
-    }//Run
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            is_running = false;
+        }
 
-
-    //Auto-closable must remain public.
-    //Without public modifier - cannot close private variables
-    @Override
-    public void close() throws IOException, Exception {
-        System.out.println("Server: Closing resources.");
 
     }
 
-}//StringServer class
+}
 

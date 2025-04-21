@@ -2,37 +2,54 @@ import java.io.IOException;
 import java.net.*;
 import java.io.*;
 
-public class PrinterClient implements AutoCloseable {
+public class PrinterClient implements Runnable {
 
+    private final String host;
+    private final int port;
+    private boolean is_running;
 
-    void Run(String portname, int portnumber) throws IOException, ClassNotFoundException {
+    PrinterClient(String host, int port){
+        this.host=host;
+        this.port=port;
+        this.is_running=true;
+    }
 
-        //a generic object that will be overwritten by the sent variable.
+    public boolean isRunning(){
+        return is_running;
+    }
+
+    public void stop(){
+        is_running=false;
+    }
+
+    @Override
+    public void run() {
+        is_running= true;
+
+        //a generic object that will be overwritten by the variable from the server.
         //Anything can replace it even another object.
-        Object var = null;
+        Object parcel;
 
-        try (Socket s = new Socket(portname, portnumber);) {
-            try (InputStream inputStream = s.getInputStream();) {
-                try (ObjectInputStream ois = new ObjectInputStream(inputStream);) {
-                    var = ois.readObject();
-                    System.out.println(var);
-                }//OIS
+        try (Socket s = new Socket(host, port)) {
+            try (InputStream inputStream = s.getInputStream()) {
+                try (ObjectInputStream oinputstream = new ObjectInputStream(inputStream)) {
+                    parcel = oinputstream.readObject();
+                    System.out.println(parcel);
+                }
 
                 //in the case of an error all catches will include a close.
                 catch (Exception e) {
                     System.out.println("Client Error: Failed to assign ois or var to a value.");
                     s.close();
                 }
-            }//IS
-        }//Socket
-    }//run()
-
-
-    @Override
-    public void close() throws Exception {
-        System.out.println("Closing Resources");
-
+            }
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            is_running = false;
+        }
     }
 
-
-}//PrinterClient Class
+}
